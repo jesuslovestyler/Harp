@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Harp</title>
+    <style>
+      :root {
+        --bg: #f6efe1;
+        --bg-deep: #efe4cf;
+        --ink: #3a2a18;
+        --ink-soft: #6d5a3e;
+        --gold: #b4832c;
+        --gold-bright: #d9a83f;
+        --card: #fffaf0;
+        --card-line: #e2d3b4;
+        --stage-1: #33220f;
+        --stage-2: #1d1207;
+        --btn: #7c4f1d;
+        --btn-ink: #fdf6e7;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #17120c;
+          --bg-deep: #100c07;
+          --ink: #efe3cb;
+          --ink-soft: #b8a888;
+          --gold: #d9a83f;
+          --gold-bright: #eec25e;
+          --card: #221a10;
+          --card-line: #3d2f1b;
+          --stage-1: #2b1c0d;
+          --stage-2: #150d05;
+          --btn: #a06a26;
+          --btn-ink: #fff8ea;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+        color: var(--ink);
+        min-height: 100vh;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .wrap {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 18px 16px 34px;
+      }
+      .topbar {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 10px;
+      }
+      .home-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--card-line);
+        background: var(--card);
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(60, 40, 10, 0.12);
+      }
+      .home-pill:active { transform: translateY(1px); }
+      header { text-align: center; margin: 4px 0 14px; }
+      h1 {
+        font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+        font-weight: 600;
+        font-size: clamp(2rem, 6vw, 2.9rem);
+        letter-spacing: 0.04em;
+        margin: 0 0 6px;
+        color: var(--ink);
+      }
+      .intro {
+        margin: 0 auto;
+        max-width: 34em;
+        font-size: 1.02rem;
+        line-height: 1.5;
+        color: var(--ink-soft);
+      }
+      .intro em { color: var(--gold); font-style: italic; }
+      .stage {
+        background: radial-gradient(120% 90% at 50% 0%, var(--stage-1) 0%, var(--stage-2) 78%);
+        border-radius: 18px;
+        border: 1px solid rgba(120, 84, 30, 0.45);
+        box-shadow: 0 14px 34px rgba(43, 28, 6, 0.35), inset 0 1px 0 rgba(255, 220, 150, 0.12);
+        padding: 10px 6px 4px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+      }
+      svg#harp {
+        display: block;
+        width: 100%;
+        height: auto;
+        touch-action: none;
+        cursor: pointer;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 14px 22px;
+        margin-top: 16px;
+      }
+      #playBtn {
+        appearance: none;
+        border: none;
+        border-radius: 999px;
+        background: var(--btn);
+        color: var(--btn-ink);
+        font: inherit;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 11px 26px;
+        cursor: pointer;
+        box-shadow: 0 3px 10px rgba(80, 52, 12, 0.35);
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        min-width: 148px;
+        justify-content: center;
+      }
+      #playBtn:active { transform: translateY(1px); }
+      #playBtn .tri { font-size: 0.85em; }
+      .vol {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.92rem;
+        color: var(--ink-soft);
+        font-weight: 600;
+      }
+      .vol input[type="range"] {
+        width: 150px;
+        accent-color: var(--gold);
+        height: 28px;
+      }
+      .now-note {
+        text-align: center;
+        min-height: 1.6em;
+        margin-top: 10px;
+        font-family: Georgia, "Iowan Old Style", serif;
+        font-size: 1.25rem;
+        letter-spacing: 0.06em;
+        color: var(--gold);
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+      .now-note.show { opacity: 1; }
+      .notes {
+        margin: 14px auto 0;
+        max-width: 36em;
+        text-align: center;
+        font-size: 0.92rem;
+        line-height: 1.55;
+        color: var(--ink-soft);
+      }
+      .notes p { margin: 6px 0; }
+      .swatch-red { color: #c0272d; font-weight: 700; }
+      .swatch-blue { color: #2f55c9; font-weight: 700; }
+      @media (prefers-color-scheme: dark) {
+        .swatch-blue { color: #7d9bff; }
+        .swatch-red { color: #ff7a72; }
+      }
+      .hint {
+        text-align: center;
+        margin-top: 4px;
+        font-size: 0.95rem;
+        color: var(--ink-soft);
+      }
+      .hint strong { color: var(--ink); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <a class="home-pill" href="https://jesuslovestyler.com/">⌂ Home</a>
+      </div>
+
+      <header>
+        <h1>Harp</h1>
+        <p class="intro">“Praise him with the sounding of the trumpet, praise him with the harp and lyre.” Harps belong in worship — the psalms are full of them. <em>Tap a string, or draw your finger across them all.</em></p>
+      </header>
+
+      <div class="stage" id="stage">
+        <svg id="harp" viewBox="0 0 1000 720" role="img" aria-label="A playable harp with twenty-two strings tuned in C major. Tap or drag across the strings to play."></svg>
+      </div>
+
+      <div class="controls">
+        <button id="playBtn" type="button" aria-pressed="false"><span class="tri" id="playIcon">▶</span><span id="playLabel">Play</span></button>
+        <label class="vol" for="volSlider">Volume
+          <input id="volSlider" type="range" min="0" max="100" value="70" />
+        </label>
+      </div>
+
+      <div class="now-note" id="nowNote" aria-live="polite"></div>
+
+      <p class="hint"><strong>Tap</strong> a string to pluck it · <strong>press and drag</strong> across the strings for a glissando</p>
+
+      <div class="notes">
+        <p>Like a real harp, the <span class="swatch-red">C strings are red</span> and the <span class="swatch-blue">F strings are dark blue</span>, so your fingers can find their place; the rest are natural gut color. This one is tuned in C major, a lever harp's home key, from C3 up to C6.</p>
+        <p>Every sound is synthesized live on your device with the Web Audio API — no recordings, no samples, and nothing is recorded or sent anywhere.</p>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        /* ---------------- Notes: C major, C3 (MIDI 48) to C6 (MIDI 84) ---------------- */
+        var SCALE = [0, 2, 4, 5, 7, 9, 11];       // C major steps
+        var LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
+        var COUNT = 22;
+        var strings = [];
+        for (var i = 0; i < COUNT; i++) {
+          var midi = 48 + 12 * Math.floor(i / 7) + SCALE[i % 7];
+          var letter = LETTERS[i % 7];
+          var octave = 3 + Math.floor(i / 7);
+          strings.push({
+            idx: i,
+            midi: midi,
+            letter: letter,
+            name: letter + octave,
+            freq: 440 * Math.pow(2, (midi - 69) / 12),
+            color: letter === "C" ? "#d43a31" : letter === "F" ? "#3a5fd0" : "#efe3c2",
+            buffer: null,
+            vib: 0,          // current vibration amplitude (viewBox px)
+            vibVel: 0,
+            lastPluck: 0,
+            el: null,
+            glowEl: null
+          });
+        }
+
+        /* ---------------- Geometry ---------------- */
+        var X0 = 168, X1 = 918;                    // string span
+        var VB_W = 1000, VB_H = 720;
+        function tx(i) { return X0 + (X1 - X0) * (i / (COUNT - 1)); }
+        function spow(t, e) {                      // signed power: safe for t outside 0..1
+          return (t < 0 ? -1 : 1) * Math.pow(Math.abs(t), e);
+        }
+        function neckY(x) {                        // where strings meet the neck
+          var t = (x - X0) / (X1 - X0);
+          return 92 + 128 * spow(t, 1.55);
+        }
+        function boardY(x) {                       // where strings meet the soundboard
+          var t = (x - X0) / (X1 - X0);
+          return 652 - 342 * spow(t, 1.08);
+        }
+        strings.forEach(function (s) {
+          s.x = tx(s.idx);
+          s.top = neckY(s.x);
+          s.bot = boardY(s.x);
+        });
+
+        /* ---------------- Build the SVG frame + strings ---------------- */
+        var svg = document.getElementById("harp");
+        var NS = "http://www.w3.org/2000/svg";
+        function el(tag, attrs) {
+          var n = document.createElementNS(NS, tag);
+          for (var k in attrs) n.setAttribute(k, attrs[k]);
+          return n;
+        }
+        function curvePath(fn, xFrom, xTo, steps) {
+          var d = "";
+          for (var j = 0; j <= steps; j++) {
+            var x = xFrom + (xTo - xFrom) * (j / steps);
+            d += (j === 0 ? "M" : "L") + x.toFixed(1) + "," + fn(x).toFixed(1);
+          }
+          return d;
+        }
+
+        var defs = el("defs", {});
+        defs.innerHTML =
+          '<linearGradient id="woodDark" x1="0" y1="0" x2="0" y2="1">' +
+            '<stop offset="0" stop-color="#9c6a2e"/><stop offset="0.5" stop-color="#7a4d1c"/><stop offset="1" stop-color="#54320f"/>' +
+          "</linearGradient>" +
+          '<linearGradient id="woodBoard" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0" stop-color="#e0aa5e"/><stop offset="0.55" stop-color="#c68c3e"/><stop offset="1" stop-color="#9c6a2a"/>' +
+          "</linearGradient>" +
+          '<linearGradient id="pillarGrad" x1="0" y1="0" x2="1" y2="0">' +
+            '<stop offset="0" stop-color="#8a5a24"/><stop offset="0.45" stop-color="#a8742f"/><stop offset="1" stop-color="#5f3a13"/>' +
+          "</linearGradient>";
+        svg.appendChild(defs);
+
+        // Soundboard body: filled shape under the string anchor line
+        var boardTopPath = curvePath(boardY, X0 - 26, X1 + 26, 40);
+        var boardShape = el("path", {
+          d: boardTopPath +
+             "L" + (X1 + 30) + "," + (boardY(X1) + 26) +
+             "L" + (X0 + 30) + ",676" +
+             "L" + (X0 - 34) + ",668 Z",
+          fill: "url(#woodBoard)",
+          stroke: "#6d4517",
+          "stroke-width": 2
+        });
+        svg.appendChild(boardShape);
+
+        // Soundholes (decorative, on the lower soundboard)
+        [[268, 600], [352, 578], [446, 552]].forEach(function (p) {
+          svg.appendChild(el("circle", { cx: p[0], cy: p[1], r: 13, fill: "rgba(70,42,10,0.5)" }));
+          svg.appendChild(el("circle", { cx: p[0], cy: p[1], r: 13, fill: "none", stroke: "rgba(255,225,160,0.35)", "stroke-width": 1.5 }));
+        });
+
+        // Pillar (left column)
+        svg.appendChild(el("path", {
+          d: "M104,86 L150,86 L158,662 Q157,682 136,682 L118,682 Q99,682 100,660 Z",
+          fill: "url(#pillarGrad)",
+          stroke: "#4c2d0d",
+          "stroke-width": 2
+        }));
+        // Pillar capital + finial
+        svg.appendChild(el("path", {
+          d: "M94,92 Q96,58 128,54 Q160,58 162,92 Q128,78 94,92 Z",
+          fill: "url(#woodDark)",
+          stroke: "#4c2d0d",
+          "stroke-width": 2
+        }));
+        svg.appendChild(el("circle", { cx: 128, cy: 46, r: 9, fill: "#caa050", stroke: "#6d4517", "stroke-width": 1.5 }));
+
+        // Neck: thick stroke following the curve above the string tops
+        svg.appendChild(el("path", {
+          d: curvePath(function (x) { return neckY(x) - 17; }, X0 - 58, X1 + 34, 40),
+          fill: "none",
+          stroke: "url(#woodDark)",
+          "stroke-width": 30,
+          "stroke-linecap": "round"
+        }));
+        svg.appendChild(el("path", {
+          d: curvePath(function (x) { return neckY(x) - 26; }, X0 - 58, X1 + 34, 40),
+          fill: "none",
+          stroke: "rgba(255,226,160,0.28)",
+          "stroke-width": 4,
+          "stroke-linecap": "round"
+        }));
+
+        // Base joining pillar foot to soundboard
+        svg.appendChild(el("path", {
+          d: "M100,660 L196,652 L196,690 L104,690 Q96,676 100,660 Z",
+          fill: "url(#woodDark)",
+          stroke: "#4c2d0d",
+          "stroke-width": 2
+        }));
+
+        // Strings: glow underlay + string path + pins
+        var stringGroup = el("g", {});
+        var pinGroup = el("g", {});
+        strings.forEach(function (s) {
+          s.glowEl = el("path", {
+            d: "M" + s.x + "," + s.top + " L" + s.x + "," + s.bot,
+            fill: "none",
+            stroke: s.color,
+            "stroke-width": 9,
+            "stroke-linecap": "round",
+            opacity: 0
+          });
+          stringGroup.appendChild(s.glowEl);
+          var w = 2.7 - 1.5 * (s.idx / (COUNT - 1));   // bass strings thicker
+          s.el = el("path", {
+            d: "M" + s.x + "," + s.top + " L" + s.x + "," + s.bot,
+            fill: "none",
+            stroke: s.color,
+            "stroke-width": w.toFixed(2),
+            "stroke-linecap": "round"
+          });
+          stringGroup.appendChild(s.el);
+          pinGroup.appendChild(el("circle", { cx: s.x, cy: s.top - 4, r: 3.2, fill: "#d8d2c4", stroke: "#55504a", "stroke-width": 0.8 }));
+          pinGroup.appendChild(el("circle", { cx: s.x, cy: s.bot + 3, r: 2.4, fill: "#7c4f1d", stroke: "#3c2408", "stroke-width": 0.7 }));
+        });
+        svg.appendChild(stringGroup);
+        svg.appendChild(pinGroup);
+
+        /* ---------------- Audio: Karplus-Strong plucked strings ---------------- */
+        var actx = null, master = null, masterLevel = 0.7;
+        function ensureAudio() {
+          if (!actx) {
+            var AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return false;
+            actx = new AC();
+            var comp = actx.createDynamicsCompressor();
+            comp.threshold.value = -18;
+            comp.ratio.value = 6;
+            master = actx.createGain();
+            master.gain.value = masterLevel;
+            master.connect(comp);
+            comp.connect(actx.destination);
+          }
+          if (actx.state === "suspended") actx.resume();
+          return true;
+        }
+
+        function makePluckBuffer(freq) {
+          var sr = actx.sampleRate;
+          var dur = 3.2;
+          var len = Math.floor(sr * dur);
+          var buf = actx.createBuffer(1, len, sr);
+          var d = buf.getChannelData(0);
+          var N = Math.max(2, Math.round(sr / freq));
+          var ring = new Float32Array(N);
+          for (var i = 0; i < N; i++) ring[i] = Math.random() * 2 - 1;
+          // Frequency-dependent damping: treble fades faster, bass rings long
+          var g = 0.9992 - Math.min(0.004, (freq - 130) * 0.0000035);
+          var idx = 0;
+          var fadeStart = len - Math.floor(sr * 0.35);
+          for (var n = 0; n < len; n++) {
+            var cur = ring[idx];
+            var nxt = ring[(idx + 1) % N];
+            ring[idx] = g * 0.5 * (cur + nxt);
+            var v = cur;
+            if (n > fadeStart) v *= (len - n) / (len - fadeStart);
+            d[n] = v;
+            idx = (idx + 1) % N;
+          }
+          return buf;
+        }
+
+        var nowNoteEl = document.getElementById("nowNote");
+        var nowTimer = null;
+        function showNote(name) {
+          nowNoteEl.textContent = name;
+          nowNoteEl.classList.add("show");
+          if (nowTimer) clearTimeout(nowTimer);
+          nowTimer = setTimeout(function () { nowNoteEl.classList.remove("show"); }, 1400);
+        }
+
+        function pluck(s, velocity) {
+          var now = performance.now();
+          s.lastPluck = now;
+          s.vib = 7 * velocity;                       // kick the visual vibration
+          showNote(s.name);
+          if (!ensureAudio()) return;
+          if (!s.buffer) s.buffer = makePluckBuffer(s.freq);
+          var src = actx.createBufferSource();
+          src.buffer = s.buffer;
+          var gain = actx.createGain();
+          gain.gain.value = velocity;
+          var pan = null;
+          if (actx.createStereoPanner) {
+            pan = actx.createStereoPanner();
+            pan.pan.value = (s.idx / (COUNT - 1)) * 0.56 - 0.28;
+            src.connect(gain); gain.connect(pan); pan.connect(master);
+          } else {
+            src.connect(gain); gain.connect(master);
+          }
+          src.start();
+        }
+
+        /* ---------------- String vibration animation ---------------- */
+        var rafId = null;
+        function animate() {
+          var any = false;
+          var t = performance.now() / 1000;
+          for (var i = 0; i < strings.length; i++) {
+            var s = strings[i];
+            if (s.vib > 0.02) {
+              any = true;
+              var visFreq = 5 + s.freq / 60;                  // visible shimmer rate
+              var off = s.vib * Math.sin(t * visFreq * Math.PI * 2 + s.idx);
+              var midY = (s.top + s.bot) / 2;
+              s.el.setAttribute("d", "M" + s.x + "," + s.top + " Q" + (s.x + off).toFixed(1) + "," + midY + " " + s.x + "," + s.bot);
+              s.glowEl.setAttribute("d", s.el.getAttribute("d"));
+              s.glowEl.setAttribute("opacity", Math.min(0.5, s.vib / 12).toFixed(2));
+              s.vib *= 0.94;
+            } else if (s.vib !== 0) {
+              s.vib = 0;
+              s.el.setAttribute("d", "M" + s.x + "," + s.top + " L" + s.x + "," + s.bot);
+              s.glowEl.setAttribute("opacity", 0);
+            }
+          }
+          if (any) rafId = requestAnimationFrame(animate);
+          else rafId = null;
+        }
+        function kickAnim() { if (!rafId) rafId = requestAnimationFrame(animate); }
+        var _pluck = pluck;
+        pluck = function (s, v) { _pluck(s, v); kickAnim(); };
+
+        /* ---------------- Pointer playing: tap + glissando drag ---------------- */
+        var stage = document.getElementById("stage");
+        var dragging = false;
+        var lastIdx = -1;
+
+        function pointToString(evt) {
+          var r = svg.getBoundingClientRect();
+          var x = (evt.clientX - r.left) / r.width * VB_W;
+          var y = (evt.clientY - r.top) / r.height * VB_H;
+          var best = 0, bd = Infinity;
+          for (var i = 0; i < COUNT; i++) {
+            var dd = Math.abs(strings[i].x - x);
+            if (dd < bd) { bd = dd; best = i; }
+          }
+          var s = strings[best];
+          if (y < s.top - 46 || y > s.bot + 46) return -1;   // generous vertical band
+          return best;
+        }
+
+        function sweepTo(idx, velocity) {
+          if (idx < 0) return;
+          if (lastIdx < 0) {
+            tryPluck(idx, velocity);
+          } else if (idx !== lastIdx) {
+            var step = idx > lastIdx ? 1 : -1;
+            for (var i = lastIdx + step; ; i += step) {
+              tryPluck(i, velocity);
+              if (i === idx) break;
+            }
+          }
+          lastIdx = idx;
+        }
+        function tryPluck(i, velocity) {
+          var s = strings[i];
+          if (performance.now() - s.lastPluck > 90) pluck(s, velocity);
+        }
+
+        svg.addEventListener("pointerdown", function (evt) {
+          evt.preventDefault();
+          stopDemo();
+          ensureAudio();
+          dragging = true;
+          lastIdx = -1;
+          try { svg.setPointerCapture(evt.pointerId); } catch (e) {}
+          var idx = pointToString(evt);
+          if (idx >= 0) { pluck(strings[idx], 1); lastIdx = idx; }
+        });
+        svg.addEventListener("pointermove", function (evt) {
+          if (!dragging) return;
+          evt.preventDefault();
+          var idx = pointToString(evt);
+          if (idx >= 0) sweepTo(idx, 0.85);
+        });
+        function endDrag() { dragging = false; lastIdx = -1; }
+        svg.addEventListener("pointerup", endDrag);
+        svg.addEventListener("pointercancel", endDrag);
+
+        /* ---------------- Volume ---------------- */
+        document.getElementById("volSlider").addEventListener("input", function (evt) {
+          masterLevel = evt.target.value / 100;
+          if (master) master.gain.setTargetAtTime(masterLevel, actx.currentTime, 0.03);
+        });
+
+        /* ---------------- Demo performance ---------------- */
+        var playBtn = document.getElementById("playBtn");
+        var playLabel = document.getElementById("playLabel");
+        var playIcon = document.getElementById("playIcon");
+        var demoTimers = [];
+        var demoOn = false;
+
+        function setPlayUI(on) {
+          demoOn = on;
+          playLabel.textContent = on ? "Stop" : "Play";
+          playIcon.textContent = on ? "■" : "▶";
+          playBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        }
+        function stopDemo() {
+          if (!demoOn) return;
+          demoTimers.forEach(clearTimeout);
+          demoTimers = [];
+          setPlayUI(false);
+        }
+        function at(ms, fn) { demoTimers.push(setTimeout(fn, ms)); }
+
+        function startDemo() {
+          ensureAudio();
+          setPlayUI(true);
+          var events = [];   // [delayMs, stringIdx, velocity]
+          var t = 0, i;
+          // Slow rising glissando
+          for (i = 0; i < COUNT; i++) { events.push([t, i, 0.8]); t += 95; }
+          t += 500;
+          // Falling glissando, gentler
+          for (i = COUNT - 1; i >= 0; i--) { events.push([t, i, 0.65]); t += 120; }
+          t += 650;
+          // Chords blooming: C — F — G — C (string indices by note)
+          var chords = [
+            [0, 2, 4, 7, 9, 11, 14],        // C E G across octaves
+            [3, 5, 7, 10, 12, 14, 17],      // F A C
+            [4, 6, 7, 11, 13, 14, 18],      // G B D (with C color)
+            [0, 2, 4, 7, 11, 14, 16, 21]    // final C bloom to the top
+          ];
+          chords.forEach(function (chord, ci) {
+            chord.forEach(function (si, k) {
+              events.push([t + k * 130, si, 0.9]);
+            });
+            t += chord.length * 130 + (ci === chords.length - 1 ? 300 : 780);
+          });
+          // One last low C, alone
+          events.push([t + 200, 0, 1]);
+          var total = t + 400;
+          events.forEach(function (e) {
+            at(e[0], (function (si, v) { return function () { pluck(strings[si], v); }; })(e[1], e[2]));
+          });
+          at(total + 2600, function () { stopDemo(); });
+        }
+
+        playBtn.addEventListener("click", function () {
+          if (demoOn) stopDemo();
+          else startDemo();
+        });
+      })();
+    </script>
+    <script data-goatcounter="https://jesuslovestyler.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  </body>
+</html>
